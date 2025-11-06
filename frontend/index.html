@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mock Interview Practice</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles and font setting */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Light gray background */
+            min-height: 100vh;
+            /* --- FIX APPLIED: REMOVED conflicting display/alignment properties --- */
+            /* Removed: display: flex; */
+            /* Removed: flex-direction: column; */
+            /* Removed: align-items: center; */
+            padding: 2rem 1rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 800px;
+            padding: 2.5rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .header-bg {
+            /* Light Teal/Green Gradient inspired by the screenshot */
+            background: linear-gradient(90deg, #10b981, #34d399); 
+        }
+        textarea:focus {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3) !important;
+        }
+        /* Custom styles for progress bars */
+        .progress-bar-container {
+            background-color: #e0e0e0;
+            border-radius: 9999px; /* Full pill shape */
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background-color: #10b981; /* Emerald green */
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="w-full max-w-4xl **mx-auto**"> 
+
+        <header class="mb-8 p-4 flex justify-between items-center w-full max-w-4xl mx-auto">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-emerald-500">Interview</span>AI
+            </h1>
+        </header>
+
+
+        <div id="start-screen" class="card">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-extrabold text-gray-900">Start Your Mock Interview</h2>
+                <p class="mt-2 text-lg text-gray-500">Enter the role you are preparing for to generate custom questions.</p>
+            </div>
+
+            <label for="job-role-input" class="block text-sm font-medium text-gray-700 mb-2">Job Role / Position</label>
+            <input type="text" id="job-role-input" placeholder="e.g., Software Engineer, Data Analyst, Marketing Manager" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition duration-150" required>
+            
+            <button onclick="startInterview()" id="start-button" class="mt-6 w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg shadow-md transition duration-200">
+                Start Practicing Free
+            </button>
+        </div>
+
+
+        <div id="interview-screen" class="card hidden">
+            <div class="header-bg p-4 rounded-t-xl mb-6">
+                <h3 class="text-white text-xl font-semibold">Mock Interview: <span id="current-role"></span></h3>
+                <p class="text-white text-sm opacity-90"><span id="current-q-number">1</span> / 6 Questions</p>
+            </div>
+            
+            <div id="question-area" class="min-h-[150px]">
+                <p class="text-lg font-medium text-gray-700 mb-4">Question <span id="q-index-display">1</span>:</p>
+                <p id="current-question" class="text-2xl font-bold text-gray-900 leading-relaxed">Loading questions...</p>
+            </div>
+
+            <div class="mt-6">
+                <label for="user-answer" class="block text-sm font-medium text-gray-700 mb-2">Your Answer</label>
+                <textarea id="user-answer" rows="6" class="w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 transition duration-150" placeholder="Type your response here..."></textarea>
+            </div>
+            
+            <div class="mt-6 flex justify-end items-center">
+                <p id="submission-status" class="text-sm font-medium mr-4 text-emerald-600 opacity-0 transition duration-300">Submitted!</p>
+                <button onclick="submitAnswer()" id="submit-button" class="py-2.5 px-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-200 disabled:opacity-50">
+                    Submit Answer
+                </button>
+            </div>
+        </div>
+
+        <div id="feedback-screen" class="card hidden p-0">
+            
+            <div class="header-bg p-6 rounded-t-xl mb-6 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Interview Feedback Report</h2>
+                    <p class="mt-1 text-white opacity-90 text-lg"><span id="feedback-role"></span></p>
+                    <div class="flex items-center text-white text-sm mt-3 space-x-6">
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h.01M7 16h.01M17 16h.01M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 
+                            <span id="report-date">Loading Date</span>
+                        </span>
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            6 Questions
+                        </span>
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> 
+                            <span id="report-duration">Loading Duration</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                
+                <div class="flex flex-wrap lg:flex-nowrap gap-6 mb-8">
+                    
+                    <div class="w-full lg:w-1/2 p-6 bg-white border border-gray-200 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-gray-900 mb-4">Performance Breakdown</h4>
+                        <div class="flex flex-col items-center justify-center mb-6 p-4 border-b border-gray-100">
+                            <span class="text-5xl font-extrabold text-emerald-500">75<span class="text-3xl">/100</span></span>
+                            <span class="text-lg font-semibold text-gray-600 mt-1">Overall Performance</span>
+                            <p class="text-center text-md font-medium text-emerald-600 mt-1 bg-emerald-50 px-3 py-0.5 rounded-full">Good</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                    <span>Technical Knowledge</span>
+                                    <span>80/100</span>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar" style="width: 80%;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                    <span>Communication Skills</span>
+                                    <span>70/100</span>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar" style="width: 70%; background-color: #fbbf24;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                    <span>Problem Solving</span>
+                                    <span>75/100</span>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar" style="width: 75%;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                    <span>Cultural Fit</span>
+                                    <span>75/100</span>
+                                </div>
+                                <div class="progress-bar-container"><div class="progress-bar" style="width: 75%; background-color: #3b82f6;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="w-full lg:w-1/2 p-6 bg-white border border-gray-200 rounded-xl shadow-md space-y-4">
+                        <h4 class="text-xl font-bold text-gray-900 mb-4">Key Insights</h4>
+                        
+                        <div id="feedback-content" class="text-gray-700 space-y-4 min-h-[150px] p-2">
+                            <div class="p-6 bg-gray-50 rounded-lg">
+                                <p class="font-semibold text-lg mb-2">Generating personalized feedback...</p>
+                                <div class="animate-pulse flex space-x-4">
+                                    <div class="flex-1 space-y-4 py-1">
+                                        <div class="h-3 bg-gray-200 rounded"></div>
+                                        <div class="space-y-2">
+                                            <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                                            <div class="h-3 bg-gray-200 rounded w-4/6"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3">Next Steps</h4>
+                            <ul class="space-y-2 text-gray-700 text-sm">
+                                <li class="flex items-center text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Download Full Report</li>
+                                <li class="flex items-center text-emerald-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h.01M7 16h.01M17 16h.01M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Schedule Follow-up Practice</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-md">
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Question-by-Question Analysis</h4>
+                    <div id="qa-analysis-container" class="space-y-6">
+                        <div class="text-gray-500">No questions answered yet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 pt-0">
+                <button onclick="resetApp()" class="mt-4 w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md transition duration-200">
+                    Start a New Interview
+                </button>
+            </div>
+        </div>
+
+
+        <div id="loading-spinner" class="card hidden text-center p-8">
+            <div class="flex flex-col items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-600 font-medium text-lg" id="loading-text">Preparing your questions...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- API Configuration and State (UPDATED) ---
+        // !!! IMPORTANT: The API key is now securely stored in the backend's .env file. !!!
+        // The frontend only needs to know the backend's URL.
+        const backendUrl = 'http://localhost:3000/api'; 
+        const MAX_QUESTIONS = 6;
+        
+        // State variables remain the same
+        let jobRole = '';
+        let questions = [];
+        let answers = [];
+        let currentQuestionIndex = 0; // 0-indexed, so 0 to 5 for 6 questions
+        let startTime = 0; // To track interview duration
+
+        // --- DOM Elements (No Change) ---
+        const startScreen = document.getElementById('start-screen');
+        const interviewScreen = document.getElementById('interview-screen');
+        const feedbackScreen = document.getElementById('feedback-screen');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const loadingText = document.getElementById('loading-text');
+        const currentQuestionEl = document.getElementById('current-question');
+        const userAnswerEl = document.getElementById('user-answer');
+        const submitButton = document.getElementById('submit-button');
+        const submissionStatusEl = document.getElementById('submission-status');
+        const currentQNumberEl = document.getElementById('current-q-number');
+        const qIndexDisplayEl = document.getElementById('q-index-display');
+        const currentRoleEl = document.getElementById('current-role');
+        const feedbackContentEl = document.getElementById('feedback-content');
+        const feedbackRoleEl = document.getElementById('feedback-role');
+        const qaAnalysisContainer = document.getElementById('qa-analysis-container');
+        const reportDateEl = document.getElementById('report-date');
+        const reportDurationEl = document.getElementById('report-duration');
+
+        // --- Utility Functions (UPDATED fetch logic) ---
+
+        function setScreen(screenId) {
+            startScreen.classList.add('hidden');
+            interviewScreen.classList.add('hidden');
+            feedbackScreen.classList.add('hidden');
+            loadingSpinner.classList.add('hidden');
+
+            if (screenId === 'start') {
+                startScreen.classList.remove('hidden');
+            } else if (screenId === 'interview') {
+                interviewScreen.classList.remove('hidden');
+            } else if (screenId === 'feedback') {
+                feedbackScreen.classList.remove('hidden');
+            } else if (screenId === 'loading') {
+                loadingSpinner.classList.remove('hidden');
+            }
+        }
+        
+        // Fetch function calls the new local backend endpoints
+        async function fetchBackend(endpoint, payload) {
+            const response = await fetch(`${backendUrl}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({ error: `Unknown error or non-JSON response from backend.` }));
+                throw new Error(errorBody.error || `Backend call failed with status ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        // --- Core Interview Logic (UPDATED API calls) ---
+
+        function startInterview() {
+            jobRole = document.getElementById('job-role-input').value.trim();
+            if (!jobRole) {
+                alert('Please enter a job role to start the interview.'); 
+                return;
+            }
+
+            setScreen('loading');
+            loadingText.textContent = `Generating ${MAX_QUESTIONS} questions for "${jobRole}"...`;
+
+            (async () => {
+                try {
+                    await generateQuestions(jobRole);
+                    currentQuestionIndex = 0;
+                    answers = [];
+                    startTime = new Date().getTime(); // Start timer
+                    currentRoleEl.textContent = jobRole;
+                    feedbackRoleEl.textContent = jobRole; 
+                    displayQuestion(currentQuestionIndex);
+                    setScreen('interview');
+
+                } catch (error) {
+                    console.error('Failed to start interview:', error);
+                    
+                    let errorMessage = `Could not generate questions. Please ensure the backend server is running on ${backendUrl.substring(0, backendUrl.lastIndexOf('/'))}. Error: ${error.message}`;
+                    
+                    loadingText.textContent = errorMessage;
+                    
+                    setTimeout(() => {
+                        resetApp();
+                        alert(`An error occurred during question generation: ${errorMessage}`);
+                    }, 3000);
+                }
+            })();
+        }
+
+        // UPDATED: Calls the new /api/questions endpoint
+        async function generateQuestions(role) {
+            const result = await fetchBackend('questions', { role });
+            questions = result.questions;
+            
+            if (questions.length !== MAX_QUESTIONS) {
+                console.warn(`Generated ${questions.length} questions, expected ${MAX_QUESTIONS}. Using what was provided.`);
+            }
+        }
+
+        function displayQuestion(index) {
+            userAnswerEl.value = '';
+            submitButton.disabled = false;
+            submissionStatusEl.classList.add('opacity-0');
+            
+            if (index < questions.length) {
+                currentQuestionEl.textContent = questions[index];
+                currentQNumberEl.textContent = index + 1;
+                qIndexDisplayEl.textContent = index + 1;
+                
+                // Change submit button text for the last question
+                if (index === questions.length - 1) {
+                    submitButton.textContent = "Finish & Get Feedback";
+                    submitButton.classList.remove('bg-blue-500');
+                    submitButton.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+                } else {
+                    submitButton.textContent = "Submit Answer";
+                    submitButton.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
+                    submitButton.classList.add('bg-blue-500');
+                }
+            }
+        }
+
+        function submitAnswer() {
+            const answer = userAnswerEl.value.trim();
+            if (!answer) {
+                alert('Please provide an answer before submitting.'); 
+                return;
+            }
+
+            answers.push({
+                question: questions[currentQuestionIndex],
+                answer: answer
+            });
+
+            submitButton.disabled = true;
+            submissionStatusEl.classList.remove('opacity-0');
+            
+            // Wait a moment for the user to see the "Submitted" status
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion(currentQuestionIndex);
+                } else {
+                    generateFeedback();
+                }
+            }, 1000); 
+        }
+
+        // UPDATED: Calls the new /api/feedback endpoint
+        function generateFeedback() {
+            const endTime = new Date().getTime();
+            const durationMs = endTime - startTime;
+            const durationMinutes = Math.round(durationMs / 60000); // Convert to minutes
+
+            // Update report stats
+            reportDateEl.textContent = new Date().toLocaleDateString('en-GB');
+            reportDurationEl.textContent = `${durationMinutes} Minutes`;
+
+            setScreen('loading');
+            loadingText.textContent = 'Analyzing your responses and generating feedback...';
+            
+            (async () => {
+                try {
+                    const result = await fetchBackend('feedback', { jobRole, answers });
+                    const feedbackText = result.feedback;
+                    
+                    // The logic to parse and display feedback remains the same
+                    const htmlContent = feedbackText
+                        .split('\n')
+                        .filter(line => line.startsWith('* '))
+                        .map(line => {
+                            const content = line.substring(2).trim();
+                            let icon = '';
+                            let title = '';
+                            let colorClass = 'text-gray-400';
+
+                            if (content.toLowerCase().startsWith('overall impression:')) {
+                                colorClass = 'text-gray-400';
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${colorClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
+                                title = 'Overall Impression';
+                            } else if (content.toLowerCase().startsWith('key strength:')) {
+                                colorClass = 'text-emerald-500';
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${colorClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
+                                title = 'Key Strength';
+                            } else if (content.toLowerCase().startsWith('area for improvement:')) {
+                                colorClass = 'text-yellow-500';
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${colorClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                                title = 'Area for Improvement';
+                            }
+                            
+                            // Extract description by removing the title prefix
+                            const description = content.split(':').slice(1).join(':').trim();
+                            
+                            return `
+                                <div class="flex items-start space-x-3 bg-white p-3 border-l-4 ${colorClass.replace('text-', 'border-')} rounded-md shadow-sm">
+                                    <div class="flex-shrink-0 mt-1">${icon}</div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">${title}</p>
+                                        <p class="text-sm text-gray-700">${description}</p>
+                                    </div>
+                                </div>
+                            `;
+                        })
+                        .join('');
+
+                    if (htmlContent) {
+                        feedbackContentEl.innerHTML = `<div class="space-y-3">${htmlContent}</div>`;
+                    } else {
+                        feedbackContentEl.innerHTML = `<p class="text-red-500">Could not generate structured feedback. Here is the raw text: <pre class="p-3 bg-gray-100 rounded-lg whitespace-pre-wrap">${feedbackText}</pre></p>`;
+                    }
+
+                    // Populate Question-by-Question Analysis
+                    qaAnalysisContainer.innerHTML = ''; // Clear previous content
+                    if (answers.length > 0) {
+                        answers.forEach((qa, index) => {
+                            const qaItem = document.createElement('div');
+                            qaItem.className = 'p-4 bg-gray-50 rounded-xl border border-gray-200';
+                            qaItem.innerHTML = `
+                                <p class="text-base font-bold text-gray-800 mb-2">Q${index + 1}: ${qa.question}</p>
+                                <p class="text-sm text-gray-700 mb-2 p-3 bg-white rounded-lg border border-gray-100">
+                                    <strong>Your Answer:</strong> ${qa.answer}
+                                </p>
+                                <p class="text-sm text-emerald-600 mt-2 font-semibold flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l5-5a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                                    </svg>
+                                    AI Insight: This response was analyzed for **Clarity** and **Relevance** to the role.
+                                </p>
+                            `;
+                            qaAnalysisContainer.appendChild(qaItem);
+                        });
+                    } else {
+                        qaAnalysisContainer.innerHTML = `<div class="text-gray-500">No questions answered yet.</div>`;
+                    }
+
+                    setScreen('feedback');
+
+                } catch (error) {
+                    console.error('Failed to generate feedback:', error);
+                    
+                    let errorMessage = `Could not generate feedback. Please ensure the backend server is running on ${backendUrl.substring(0, backendUrl.lastIndexOf('/'))}. Error: ${error.message}`;
+                    
+                    loadingText.textContent = errorMessage;
+                    setTimeout(() => resetApp(), 3000);
+                }
+            })();
+        }
+
+        function resetApp() {
+            jobRole = '';
+            questions = [];
+            answers = [];
+            currentQuestionIndex = 0;
+            startTime = 0;
+            document.getElementById('job-role-input').value = '';
+            // Reset feedback content placeholder
+            feedbackContentEl.innerHTML = `
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <p class="font-semibold text-lg mb-2">Generating personalized feedback...</p>
+                    <div class="animate-pulse flex space-x-4">
+                        <div class="flex-1 space-y-4 py-1">
+                            <div class="h-3 bg-gray-200 rounded"></div>
+                            <div class="space-y-2">
+                                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                                <div class="h-3 bg-gray-200 rounded w-4/6"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            qaAnalysisContainer.innerHTML = '<div class="text-gray-500">No questions answered yet.</div>'; // Clear Q&A analysis
+            setScreen('start');
+        }
+
+        // Initialize view on load
+        window.onload = () => setScreen('start');
+    </script>
+</body>
+</html>
